@@ -10,4 +10,15 @@ int main(){
 		5. Check for invalid moves
 		6. Exit or finish game
 	**/
+
+	player player1;
+	player player2;
+
+	player1.color = 1;
+	player2.color = 0;
+
+	init(&player1);
+	init(&player2);
+
+	printBoard(player1, player2);
 }
