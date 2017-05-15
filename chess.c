@@ -6,7 +6,7 @@ int main(){
 	player player2;
 	piece board[8][8];
 	int i,j;
-	char playerMove[20] = "B1-C1";
+	char playerMove[20];
 
 	player1.color = 1;
 	player2.color = 0;
@@ -22,5 +22,25 @@ int main(){
 		}
 	}
 
-	move(player1, playerMove);
+	loadBoard(board, player1, player2);
+	printBoard(board);
+
+	while(1){
+		if(player1.isTurn == 1 ? printf("Player 1's turn\n") : printf("Player 2's turn\n"))
+
+		printf("Enter move: ");
+		fgets(playerMove, 20, stdin);
+
+		if(player1.isTurn == 1){
+			move(board, &player1, playerMove);
+		}else{
+			move(board, &player2, playerMove);
+		}
+
+		player1.isTurn = player1.isTurn == 1 ? 0 : 1;
+		player2.isTurn = player2.isTurn == 1 ? 0 : 1;
+
+		loadBoard(board, player1, player2);
+		printBoard(board);	
+	}	
 }

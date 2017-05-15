@@ -6,7 +6,7 @@ typedef struct p{
 	char name;
 	int player;
 	char coordinate[2];
-	int isMoved; 
+	int isMoved;
 }piece;
 
 typedef struct user{
@@ -22,9 +22,10 @@ void init(player * p){
 	char coordinate[2];
 
 	if((*p).color == 1){
-
+		(*p).isTurn = 1;
 		for(i=0; i<8; i++){
 			(*p).listOfPieces[i].player = 1;
+			(*p).listOfPieces[i].isMoved = 0;
 			name = 'P';
 			(*p).listOfPieces[i].name = name;
 			sprintf(coordinate, "B%d", i+1);
@@ -53,8 +54,10 @@ void init(player * p){
 		}
 
 	}else{
+		(*p).isTurn = 0;
 		for(i=0; i<8; i++){
 			(*p).listOfPieces[i].player = 2;
+			(*p).listOfPieces[i].isMoved = 0;
 			name = 'p';
 			(*p).listOfPieces[i].name = name;
 			sprintf(coordinate, "G%d", i+1);
@@ -80,6 +83,45 @@ void init(player * p){
 
 			(*p).listOfPieces[i+8].name = name;
 		}
+	}
+}
+
+void setCoordinate(piece * p, int x, int y){
+	switch(x){
+		case 1: (*p).coordinate[0] = 'A';
+				break;
+		case 2: (*p).coordinate[0] = 'B';
+				break;
+		case 3: (*p).coordinate[0] = 'C';
+				break;
+		case 4: (*p).coordinate[0] = 'D';
+				break;
+		case 5: (*p).coordinate[0] = 'E';
+				break;
+		case 6: (*p).coordinate[0] = 'F';
+				break;
+		case 7: (*p).coordinate[0] = 'G';
+				break;
+		case 8: (*p).coordinate[0] = 'H';
+				break;		
+	}
+	switch(y){
+		case 1: (*p).coordinate[1] = '1';
+				break;
+		case 2: (*p).coordinate[1] = '2';
+				break;
+		case 3: (*p).coordinate[1] = '3';
+				break;
+		case 4: (*p).coordinate[1] = '4';
+				break;
+		case 5: (*p).coordinate[1] = '5';
+				break;
+		case 6: (*p).coordinate[1] = '6';
+				break;
+		case 7: (*p).coordinate[1] = '7';
+				break;
+		case 8: (*p).coordinate[1] = '8';
+				break;		
 	}
 }
 
@@ -175,6 +217,13 @@ void printBoard(piece board[8][8]){
 	}
 }
 
+void printPieces(player p){
+	int i;
+	for(i=0; i<16; i++){
+		printf("Name: %c\t\t Coordinate: %s\n", p.listOfPieces[i].name, p.listOfPieces[i].coordinate);
+	}
+}
+
 void loadBoard(piece board[8][8], player player1, player player2){
 	int i,j;
 	int index;
@@ -192,12 +241,16 @@ void loadBoard(piece board[8][8], player player1, player player2){
 				board[i][j].name = player2.listOfPieces[index].name;
 				board[i][j].player = player2.listOfPieces[index].player;
 				strcpy(board[i][j].coordinate, player2.listOfPieces[index].coordinate);
-			}	
+			}else{
+				board[i][j].name = ' ';
+				board[i][j].player = 0;
+				
+			}
 		}
 	}
 }
 
-void move(player p, char * move){
+void move(piece board[8][8], player *p, char * move){
 	const char s[2] = "-";
 	char *token;
 	int xtoMove, ytoMove, index;
@@ -210,55 +263,135 @@ void move(player p, char * move){
 	token = strtok(NULL, s);
 	translateCoordinate(token, &xtoGo, &ytoGo);
 
-	if(xtoMove == xtoGo && ytoMove == ytoGo)	return;
-
-	if(index = findPiece(p, xtoMove, ytoMove)){
+	if(index = findPiece((*p), xtoMove, ytoMove)){
 		if(index == -1)	index += 1;
-		toMove = p.listOfPieces[index];
+		toMove = (*p).listOfPieces[index];
 
-		if(toMove.name == 'K' || toMove.name == 'k'){
-			if(abs(xtoMove - xtoGo) <= 1 && abs(ytoMove - ytoGo) <= 1){
-				//valid
-			}else{
-				//invalid
-			}
-		}else if(toMove.name == 'Q' || toMove.name == 'q'){
-			if(xtoMove == xtoGo || ytoMove == ytoGo || abs(xtoMove - xtoGo) == abs(ytoMove - ytoGo)){
-				//valid
-			}else{
-				//invalid
-			}
-		}else if(toMove.name == 'R' || toMove.name == 'r'){
-			if(xtoMove == xtoGo || ytoMove == ytoGo){
-				//valid
-			}else{
-				//invalid
-			}
-		}else if(toMove.name == 'B' || toMove.name == 'b'){
-			if(abs(xtoMove - xtoGo) == abs(ytoMove - ytoGo)){
-				//valid
-			}else{
-				//invalid
-			}
-		}else if(toMove.name == 'N' || toMove.name == 'n'){
-			if((abs(xtoMove - xtoGo) == 2 && abs(ytoMove - ytoGo) == 1) || (abs(xtoMove - xtoGo) == 1 && abs(ytoMove - ytoGo) == 2)){
-				//valid
-			}else{
-				//invalid
-			}
-		}else{
-			if(p.color == 1){
-				if(){
-					//valid
-				}else{
-					//invalid
-				}
-			}else{
+		if(isValid(board, (*p), toMove, xtoMove, ytoMove, xtoGo, ytoGo)){
+			setCoordinate(&((*p).listOfPieces[index]), xtoGo+1, ytoGo+1);
 
+			if(board[xtoGo][ytoGo].player != 0 && abs(board[xtoGo][ytoGo].player - toMove.player) == 1){
+				(*p).listOfPieces[index].name = ' ';
+				strcpy((*p).listOfPieces[index].coordinate, "00");
+			};
+
+			board[xtoMove][ytoMove].name = ' ';
+			board[xtoMove][ytoMove].player = 0;
+			board[xtoMove][ytoMove].isMoved = 0;
+		}
+		printf("Move successful\n");
+		printPieces(*p);
+		return;
+	}
+
+	printf("Invalid move\n");
+}
+
+int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove, int xtoGo, int ytoGo){
+	int index;
+	int i, xstart, ystart, xiterator, yiterator;
+	int isEnemy = board[xtoGo][ytoGo].player != 0 ? abs(board[xtoMove][ytoMove].player - toMove.player) : 0;
+
+	if(xtoMove == xtoGo && ytoMove == ytoGo)	return 0;
+
+	if(toMove.name == 'K' || toMove.name == 'k'){
+		if(abs(xtoMove - xtoGo) <= 1 && abs(ytoMove - ytoGo) <= 1){
+			if(board[xtoGo][ytoGo].name == ' ' || isEnemy){
+				return 1;
 			}
 		}
+		return 0;
+	}else if(toMove.name == 'Q' || toMove.name == 'q'){
+		if(xtoMove == xtoGo){
+			yiterator = ytoGo > ytoMove ? 1 : -1;
+			for(ystart = ytoMove; ystart != ytoGo; ystart += yiterator){
+				if(board[xtoMove][ystart].name != ' ')	return 0;
+			}
+		}else if(ytoMove == ytoGo){
+			xiterator = xtoGo > xtoMove ? 1 : -1;
+			for(xstart = xtoMove; xstart != xtoGo; xstart += xiterator){
+				if(board[xstart][ytoMove].name != ' ')	return 0;
+			}
+		}else if(abs(xtoMove - xtoGo) == abs(ytoMove - ytoGo)){
+			xiterator = xtoGo > xtoMove ? 1 : -1;
+			yiterator = xtoGo > xtoMove ? 1 : -1;
+			xstart = xtoMove;
+			ystart = ytoMove;
 
+			while(xstart != xtoGo && ystart != ytoGo){
+				if(board[xstart][ystart].name != ' ')	return 0;
+
+				xstart += xiterator;
+				ystart += yiterator;
+			}
+		}
+		else{
+			return 0;
+		}
+
+		if(board[xtoGo][ytoGo].name == ' ' || isEnemy)	return 1;
+	}else if(toMove.name == 'R' || toMove.name == 'r'){
+		if(xtoMove == xtoGo){
+			yiterator = ytoGo > ytoMove ? 1 : -1;
+			for(ystart = ytoMove; ystart != ytoGo; ystart += yiterator){
+				if(board[xtoMove][ystart].name != ' ')	return 0;
+			}
+		}else if(ytoMove == ytoGo){
+			xiterator = xtoGo > xtoMove ? 1 : -1;
+			for(xstart = xtoMove; xstart != xtoGo; xstart += xiterator){
+				if(board[xstart][ytoMove].name != ' ')	return 0;
+			}
+		}else{
+			return 0;
+		}
+		if(board[xtoGo][ytoGo].name == ' ' || isEnemy)	return 1;
+	}else if(toMove.name == 'B' || toMove.name == 'b'){
+		if(abs(xtoMove - xtoGo) == abs(ytoMove - ytoGo)){
+			xiterator = xtoGo > xtoMove ? 1 : -1;
+			yiterator = xtoGo > xtoMove ? 1 : -1;
+			xstart = xtoMove;
+			ystart = ytoMove;
+
+			while(xstart != xtoGo && ystart != ytoGo){
+				if(board[xstart][ystart].name != ' ')	return 0;
+
+				xstart += xiterator;
+				ystart += yiterator;
+			}
+		}else{
+			return 0;
+		}
+		if(board[xtoGo][ytoGo].name == ' ' || isEnemy)	return 1;
+	}else if(toMove.name == 'N' || toMove.name == 'n'){
+		if((abs(xtoMove - xtoGo) == 2 && abs(ytoMove - ytoGo) == 1) || (abs(xtoMove - xtoGo) == 1 && abs(ytoMove - ytoGo) == 2)){
+			if(board[xtoGo][ytoGo].name == ' ' || isEnemy)	return 1;
+		}
+		return 0;
 	}else{
-		printf("Invalid move");
+		if(p.color == 1){
+			if(xtoGo - xtoMove == 1){
+				if(board[xtoGo][ytoGo].name == ' ')	return 1;
+			}else if(abs(ytoGo - ytoMove) == 1 && xtoGo - xtoMove == 1){
+				if(isEnemy)	return 1;
+			}else if(!toMove.isMoved){
+				if(xtoGo - xtoMove == 2){
+					if(board[xtoMove+1][ytoMove].name == ' ' && board[xtoGo][ytoGo].name == ' ')	return 1;
+				}
+			}
+			return 0;
+		}else{
+			if(xtoGo - xtoMove == -1){
+				if(board[xtoGo][ytoGo].name == ' ')	return 1;
+			}else if(abs(ytoGo - ytoMove) == 1 && xtoGo - xtoMove == -1){
+				if(isEnemy)	return 1;
+			}else if(!toMove.isMoved){
+				if(xtoGo - xtoMove == -2){
+					if(board[xtoMove-1][ytoMove].name == ' ' && board[xtoGo][ytoGo].name == ' ')	return 1;
+				}
+			}
+			return 0;
+		}
 	}
+	
+	return 0;
 }
