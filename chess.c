@@ -34,12 +34,14 @@ int main(){
 
 		if(player1.isTurn == 1){
 			while(!move(board, &player1, &player2, playerMove)){
+				printBoard(board);
 				printf("Enter move: ");
 				fgets(playerMove, 20, stdin);
 			}
 		}else{
 			while(!move(board, &player2, &player1, playerMove)){
 				if(isDone == -1) return;
+				printBoard(board);
 				printf("Enter move: ");
 				fgets(playerMove, 20, stdin);
 			}

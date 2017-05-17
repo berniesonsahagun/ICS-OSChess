@@ -278,22 +278,21 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 	}else if(toMove.name == 'Q' || toMove.name == 'q'){
 		if(xtoMove == xtoGo){
 			yiterator = ytoGo > ytoMove ? 1 : -1;
-			for(ystart = ytoMove+1; ystart != ytoGo; ystart += yiterator){
+			for(ystart = ytoMove+yiterator; ystart != ytoGo; ystart += yiterator){
 				if(board[xtoMove][ystart].name != ' ')	return 0;
 			}
 		}else if(ytoMove == ytoGo){
 			xiterator = xtoGo > xtoMove ? 1 : -1;
-			for(xstart = xtoMove+1; xstart != xtoGo; xstart += xiterator){
+			for(xstart = xtoMove+xiterator; xstart != xtoGo; xstart += xiterator){
 				if(board[xstart][ytoMove].name != ' ')	return 0;
 			}
 		}else if(absoluteVal(xtoMove - xtoGo) == absoluteVal(ytoMove - ytoGo)){
 			xiterator = xtoGo > xtoMove ? 1 : -1;
 			yiterator = xtoGo > xtoMove ? 1 : -1;
-			xstart = xtoMove+1;
-			ystart = ytoMove+1;
+			xstart = xtoMove+xiterator;
+			ystart = ytoMove+yiterator;
 
 			while(xstart != xtoGo && ystart != ytoGo){
-				printf("%c\n",board[xstart][ystart]);
 				if(board[xstart][ystart].name != ' ')	return 0;
 
 				xstart += xiterator;
@@ -307,12 +306,12 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 	}else if(toMove.name == 'R' || toMove.name == 'r'){
 		if(xtoMove == xtoGo){
 			yiterator = ytoGo > ytoMove ? 1 : -1;
-			for(ystart = ytoMove+1; ystart != ytoGo; ystart += yiterator){
+			for(ystart = ytoMove+yiterator; ystart != ytoGo; ystart += yiterator){
 				if(board[xtoMove][ystart].name != ' ')	return 0;
 			}
 		}else if(ytoMove == ytoGo){
 			xiterator = xtoGo > xtoMove ? 1 : -1;
-			for(xstart = xtoMove+1; xstart != xtoGo; xstart += xiterator){
+			for(xstart = xtoMove+xiterator; xstart != xtoGo; xstart += xiterator){
 				if(board[xstart][ytoMove].name != ' ')	return 0;
 			}
 		}else{
@@ -323,8 +322,8 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 		if(absoluteVal(xtoMove - xtoGo) == absoluteVal(ytoMove - ytoGo)){
 			xiterator = xtoGo > xtoMove ? 1 : -1;
 			yiterator = xtoGo > xtoMove ? 1 : -1;
-			xstart = xtoMove+1;
-			ystart = ytoMove+1;
+			xstart = xtoMove+xiterator;
+			ystart = ytoMove+yiterator;
 
 			while(xstart != xtoGo && ystart != ytoGo){
 				if(board[xstart][ystart].name != ' ')	return 0;
@@ -435,6 +434,12 @@ int move(piece board[8][8], player *p, player *p2, char * move){
 		if(isValid(board, (*p), toMove, xtoMove, ytoMove, xtoGo, ytoGo)){
 			setCoordinate(&((*p).listOfPieces[index]), xtoGo+1, ytoGo+1);
 
+			if(board[xtoGo][ytoGo].player != 0 && board[xtoGo][ytoGo].player != toMove.player){
+				del = findPiece((*p2), xtoGo, ytoGo);		
+				setCoordinate(&((*p2).listOfPieces[del]), -1, -1);
+				(*p2).listOfPieces[del].name = 'X';
+			};
+
 			if(isMate(board, *p, *p2)){
 				printf("Game Over! %s wins\n", (*p2).name);
 				return -1;
@@ -450,16 +455,12 @@ int move(piece board[8][8], player *p, player *p2, char * move){
 				loadBoard(board, *p, *p2);
 			}
 
-			if(board[xtoGo][ytoGo].player != 0 && board[xtoGo][ytoGo].player != toMove.player){
-				del = findPiece((*p2), xtoGo, ytoGo);		
-				setCoordinate(&((*p2).listOfPieces[del]), -1, -1);
-				(*p2).listOfPieces[del].name = 'X';
-			};
-
 			setCoordinate(&((*p).listOfPieces[index]), xtoGo+1, ytoGo+1);
 			loadBoard(board, *p, *p2);
 			return 1;
 		}
+		printf("Invalid move\n");
+		return 0;
 	}
 	printf("Piece not found\n");
 	return 0;
