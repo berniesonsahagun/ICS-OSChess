@@ -32,9 +32,15 @@ int main(){
 		fgets(playerMove, 20, stdin);
 
 		if(player1.isTurn == 1){
-			move(board, &player1, &player2, playerMove);
+			while(move(board, &player1, &player2, playerMove)){
+				printf("Enter move: ");
+				fgets(playerMove, 20, stdin);
+			}
 		}else{
-			move(board, &player2, &player1, playerMove);
+			while(move(board, &player2, &player1, playerMove)){
+				printf("Enter move: ");
+				fgets(playerMove, 20, stdin);
+			}
 		}
 
 		player1.isTurn = player1.isTurn == 1 ? 0 : 1;
