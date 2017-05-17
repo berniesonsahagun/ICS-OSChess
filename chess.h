@@ -92,6 +92,8 @@ void init(player * p){
 
 void setCoordinate(piece * p, int x, int y){
 	switch(x){
+		case -1:	(*p).coordinate[0] = '0';
+					break; 
 		case 1: (*p).coordinate[0] = 'A';
 				break;
 		case 2: (*p).coordinate[0] = 'B';
@@ -110,6 +112,8 @@ void setCoordinate(piece * p, int x, int y){
 				break;		
 	}
 	switch(y){
+		case -1:	(*p).coordinate[0] = '0';
+					break;
 		case 1: (*p).coordinate[1] = '1';
 				break;
 		case 2: (*p).coordinate[1] = '2';
@@ -131,6 +135,8 @@ void setCoordinate(piece * p, int x, int y){
 
 void translateCoordinate(char coordinate[2], int * x, int * y){
 	switch(coordinate[0]){
+			case '0':	*x = -1;
+						break;
 			case 'A':	*x = 0;
 						break;
 			case 'B':	*x = 1;
@@ -149,6 +155,8 @@ void translateCoordinate(char coordinate[2], int * x, int * y){
 						break;
 		}
 	switch(coordinate[1]){
+		case '0':	*x = -1;
+					break;
 		case '1':	*y = 0;
 					break;
 		case '2':	*y = 1;
@@ -253,45 +261,6 @@ void loadBoard(piece board[8][8], player player1, player player2){
 		}
 	}
 }
-
-void move(piece board[8][8], player *p, char * move){
-	const char s[2] = "-";
-	char *token;
-	int xtoMove, ytoMove, index;
-	int xtoGo, ytoGo;
-	piece toMove;
-	
-	token = strtok(move, s);
-	translateCoordinate(token, &xtoMove, &ytoMove);
-
-	token = strtok(NULL, s);
-	translateCoordinate(token, &xtoGo, &ytoGo);
-
-	if(index = findPiece((*p), xtoMove, ytoMove)){
-		if(index == -1)	index += 1;
-		toMove = (*p).listOfPieces[index];
-
-		if(isValid(board, (*p), toMove, xtoMove, ytoMove, xtoGo, ytoGo)){
-			setCoordinate(&((*p).listOfPieces[index]), xtoGo+1, ytoGo+1);
-
-			if(board[xtoGo][ytoGo].player != 0 && absoluteVal(board[xtoGo][ytoGo].player - toMove.player) == 1){
-				(*p).listOfPieces[index].name = ' ';
-				strcpy((*p).listOfPieces[index].coordinate, "00");
-			};
-
-			board[xtoMove][ytoMove].name = ' ';
-			board[xtoMove][ytoMove].player = 0;
-			board[xtoMove][ytoMove].isMoved = 0;
-			printf("Move successful\n");
-			return;
-		}
-		
-		
-	}
-
-	printf("Invalid move\n");
-}
-
 
 int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove, int xtoGo, int ytoGo){
 	int index;
@@ -401,3 +370,62 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 	
 	return 0;
 }
+
+int isCheck(piece board[8][8], player p1, player p2){
+	int i;
+	int xtoMove, ytoMove, xtoGo, ytoGo;
+
+	for(i = 0; i < 16; i++){
+		if(p1.listOfPieces[i].name == 'K')	{
+			translateCoordinate(p1.listOfPieces[i].coordinate, &xtoGo, &ytoGo);
+			break;
+		}
+	}
+
+	for(i=0; i<16; i++){
+		translateCoordinate(p2.listOfPieces[i].coordinate, &xtoMove, &ytoMove);
+		if(isValid(board, p1, p2.listOfPieces[i], xtoMove, ytoMove, xtoGo, ytoGo)){
+			return 1;
+		}
+	}
+
+	return 0;
+
+}
+
+void move(piece board[8][8], player *p, player *p2 char * move){
+	const char s[2] = "-";
+	char *token;
+	int xtoMove, ytoMove, index;
+	int xtoGo, ytoGo;
+	piece toMove;
+	
+	token = strtok(move, s);
+	translateCoordinate(token, &xtoMove, &ytoMove);
+
+	token = strtok(NULL, s);
+	translateCoordinate(token, &xtoGo, &ytoGo);
+
+	if(index = findPiece((*p), xtoMove, ytoMove)){
+		if(index == -1)	index += 1;
+		toMove = (*p).listOfPieces[index];
+
+		if(isValid(board, (*p), toMove, xtoMove, ytoMove, xtoGo, ytoGo)){
+			setCoordinate(&((*p).listOfPieces[index]), xtoGo+1, ytoGo+1);
+
+			if(board[xtoGo][ytoGo].player != 0 && absoluteVal(board[xtoGo][ytoGo].player - toMove.player) == 1){
+				index = findPiece((*p2), xtoGo, ytoGo);		
+				setCoordinate(&((*p).listOfPieces[index]), -1, -1);
+				strcpy((*p2).listOfPieces[index].name, "XD");
+			};
+
+			printf("Move successful\n");
+			return;
+		}
+		
+		
+	}
+
+	printf("Invalid move\n");
+}
+
