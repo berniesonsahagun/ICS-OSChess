@@ -376,7 +376,7 @@ int isCheck(piece board[8][8], player p1, player p2){
 	int xtoMove, ytoMove, xtoGo, ytoGo;
 
 	for(i=0; i<16; i++){
-		if(p1.listOfPieces[i].name == 'K')	{
+		if(p1.listOfPieces[i].name == 'K' || p1.listOfPieces[i].name == 'k')	{
 			translateCoordinate(p1.listOfPieces[i].coordinate, &xtoGo, &ytoGo);
 			break;
 		}
@@ -390,10 +390,32 @@ int isCheck(piece board[8][8], player p1, player p2){
 	}
 
 	return 0;
-
 }
 
-int move(piece board[8][8], player *p, player *p2 char * move){
+int isMate(piece board[8][8], player p1, player p2){
+	int i,j,k;
+	int xtoMove, ytoMove;
+	for(i=0; i<16; i++){
+		translateCoordinate(p1.listOfPieces[i].coordinate, &xtoMove, &ytoMove);
+
+		for(j=0; j<8; j++){
+			for(k=0; k<8; k++){
+				if(isValid(board, p1, p1.listOfPieces[i], xtoMove, ytoMove, j, k)){
+					setCoordinate(&((p1).listOfPieces[i]), j+1, k+1);
+					loadBoard(board, p1, p2);
+					if(!isCheck(board, p1, p2)){
+						setCoordinate(&((p1).listOfPieces[i]), xtoMove+1, ytoMove+1);
+						loadBoard(board, p1, p2);
+						return 0;
+					}
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+int move(piece board[8][8], player *p, player *p2, char * move){
 	const char s[2] = "-";
 	char *token;
 	int xtoMove, ytoMove, index;
@@ -412,9 +434,16 @@ int move(piece board[8][8], player *p, player *p2 char * move){
 
 		if(isValid(board, (*p), toMove, xtoMove, ytoMove, xtoGo, ytoGo)){
 			setCoordinate(&((*p).listOfPieces[index]), xtoGo+1, ytoGo+1);
-			
+			loadBoard(board, *p, *p2);
+
+			if(isMate(board, *p, *p2)){
+				printf("Game Over! %s wins\n", (*p2).name);
+				return -1;
+			}
+
 			if(isCheck(board, *p, *p2)){
 				setCoordinate(&((*p).listOfPieces[index]), xtoMove+1, ytoMove+1);
+				loadBoard(board, *p, *p2);
 				printf("You are checked\n");
 				return 0;
 			}
@@ -422,12 +451,12 @@ int move(piece board[8][8], player *p, player *p2 char * move){
 			if(board[xtoGo][ytoGo].player != 0 && absoluteVal(board[xtoGo][ytoGo].player - toMove.player) == 1){
 				index = findPiece((*p2), xtoGo, ytoGo);		
 				setCoordinate(&((*p).listOfPieces[index]), -1, -1);
-				strcpy((*p2).listOfPieces[index].name, "XD");
+				(*p2).listOfPieces[index].name = 'X';
 			};
+
 			return 1;
 		}
 	}
 	return 0;
 	printf("Invalid move\n");
 }
-
