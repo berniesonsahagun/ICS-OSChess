@@ -33,13 +33,12 @@ int main(){
 		fgets(playerMove, 20, stdin);
 
 		if(player1.isTurn == 1){
-			while(isDone = move(board, &player1, &player2, playerMove)){
-				if(isDone == -1) return;
+			while(!move(board, &player1, &player2, playerMove)){
 				printf("Enter move: ");
 				fgets(playerMove, 20, stdin);
 			}
 		}else{
-			while(isDone = move(board, &player2, &player1, playerMove)){
+			while(!move(board, &player2, &player1, playerMove)){
 				if(isDone == -1) return;
 				printf("Enter move: ");
 				fgets(playerMove, 20, stdin);
