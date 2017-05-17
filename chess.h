@@ -16,6 +16,10 @@ typedef struct user{
 	int color;	// 0 - black, 1 - white
 }player;
 
+int absoluteVal(int num){
+	return num < 0 ? (num * -1) : num;
+}
+
 void init(player * p){
 	int i;
 	char name;
@@ -79,7 +83,7 @@ void init(player * p){
 				name = 'q';
 			}else{
 				name = 'k';
-			}
+	}
 
 			(*p).listOfPieces[i+8].name = name;
 		}
@@ -270,7 +274,7 @@ void move(piece board[8][8], player *p, char * move){
 		if(isValid(board, (*p), toMove, xtoMove, ytoMove, xtoGo, ytoGo)){
 			setCoordinate(&((*p).listOfPieces[index]), xtoGo+1, ytoGo+1);
 
-			if(board[xtoGo][ytoGo].player != 0 && abs(board[xtoGo][ytoGo].player - toMove.player) == 1){
+			if(board[xtoGo][ytoGo].player != 0 && absoluteVal(board[xtoGo][ytoGo].player - toMove.player) == 1){
 				(*p).listOfPieces[index].name = ' ';
 				strcpy((*p).listOfPieces[index].coordinate, "00");
 			};
@@ -278,24 +282,26 @@ void move(piece board[8][8], player *p, char * move){
 			board[xtoMove][ytoMove].name = ' ';
 			board[xtoMove][ytoMove].player = 0;
 			board[xtoMove][ytoMove].isMoved = 0;
+			printf("Move successful\n");
+			return;
 		}
-		printf("Move successful\n");
-		printPieces(*p);
-		return;
+		
+		
 	}
 
 	printf("Invalid move\n");
 }
 
+
 int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove, int xtoGo, int ytoGo){
 	int index;
 	int i, xstart, ystart, xiterator, yiterator;
-	int isEnemy = board[xtoGo][ytoGo].player != 0 ? abs(board[xtoMove][ytoMove].player - toMove.player) : 0;
+	int isEnemy = board[xtoGo][ytoGo].player != 0 ? absoluteVal(board[xtoGo][ytoGo].player - toMove.player) : 0;
 
 	if(xtoMove == xtoGo && ytoMove == ytoGo)	return 0;
 
 	if(toMove.name == 'K' || toMove.name == 'k'){
-		if(abs(xtoMove - xtoGo) <= 1 && abs(ytoMove - ytoGo) <= 1){
+		if(absoluteVal(xtoMove - xtoGo) <= 1 && absoluteVal(ytoMove - ytoGo) <= 1){
 			if(board[xtoGo][ytoGo].name == ' ' || isEnemy){
 				return 1;
 			}
@@ -304,28 +310,28 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 	}else if(toMove.name == 'Q' || toMove.name == 'q'){
 		if(xtoMove == xtoGo){
 			yiterator = ytoGo > ytoMove ? 1 : -1;
-			for(ystart = ytoMove; ystart != ytoGo; ystart += yiterator){
+			for(ystart = ytoMove+1; ystart != ytoGo; ystart += yiterator){
 				if(board[xtoMove][ystart].name != ' ')	return 0;
 			}
 		}else if(ytoMove == ytoGo){
 			xiterator = xtoGo > xtoMove ? 1 : -1;
-			for(xstart = xtoMove; xstart != xtoGo; xstart += xiterator){
+			for(xstart = xtoMove+1; xstart != xtoGo; xstart += xiterator){
 				if(board[xstart][ytoMove].name != ' ')	return 0;
 			}
-		}else if(abs(xtoMove - xtoGo) == abs(ytoMove - ytoGo)){
+		}else if(absoluteVal(xtoMove - xtoGo) == absoluteVal(ytoMove - ytoGo)){
 			xiterator = xtoGo > xtoMove ? 1 : -1;
 			yiterator = xtoGo > xtoMove ? 1 : -1;
-			xstart = xtoMove;
-			ystart = ytoMove;
+			xstart = xtoMove+1;
+			ystart = ytoMove+1;
 
 			while(xstart != xtoGo && ystart != ytoGo){
+				printf("%c\n",board[xstart][ystart]);
 				if(board[xstart][ystart].name != ' ')	return 0;
 
 				xstart += xiterator;
 				ystart += yiterator;
 			}
-		}
-		else{
+		}else{
 			return 0;
 		}
 
@@ -333,12 +339,12 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 	}else if(toMove.name == 'R' || toMove.name == 'r'){
 		if(xtoMove == xtoGo){
 			yiterator = ytoGo > ytoMove ? 1 : -1;
-			for(ystart = ytoMove; ystart != ytoGo; ystart += yiterator){
+			for(ystart = ytoMove+1; ystart != ytoGo; ystart += yiterator){
 				if(board[xtoMove][ystart].name != ' ')	return 0;
 			}
 		}else if(ytoMove == ytoGo){
 			xiterator = xtoGo > xtoMove ? 1 : -1;
-			for(xstart = xtoMove; xstart != xtoGo; xstart += xiterator){
+			for(xstart = xtoMove+1; xstart != xtoGo; xstart += xiterator){
 				if(board[xstart][ytoMove].name != ' ')	return 0;
 			}
 		}else{
@@ -346,11 +352,11 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 		}
 		if(board[xtoGo][ytoGo].name == ' ' || isEnemy)	return 1;
 	}else if(toMove.name == 'B' || toMove.name == 'b'){
-		if(abs(xtoMove - xtoGo) == abs(ytoMove - ytoGo)){
+		if(absoluteVal(xtoMove - xtoGo) == absoluteVal(ytoMove - ytoGo)){
 			xiterator = xtoGo > xtoMove ? 1 : -1;
 			yiterator = xtoGo > xtoMove ? 1 : -1;
-			xstart = xtoMove;
-			ystart = ytoMove;
+			xstart = xtoMove+1;
+			ystart = ytoMove+1;
 
 			while(xstart != xtoGo && ystart != ytoGo){
 				if(board[xstart][ystart].name != ' ')	return 0;
@@ -363,7 +369,7 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 		}
 		if(board[xtoGo][ytoGo].name == ' ' || isEnemy)	return 1;
 	}else if(toMove.name == 'N' || toMove.name == 'n'){
-		if((abs(xtoMove - xtoGo) == 2 && abs(ytoMove - ytoGo) == 1) || (abs(xtoMove - xtoGo) == 1 && abs(ytoMove - ytoGo) == 2)){
+		if((absoluteVal(xtoMove - xtoGo) == 2 && absoluteVal(ytoMove - ytoGo) == 1) || (absoluteVal(xtoMove - xtoGo) == 1 && absoluteVal(ytoMove - ytoGo) == 2)){
 			if(board[xtoGo][ytoGo].name == ' ' || isEnemy)	return 1;
 		}
 		return 0;
@@ -371,7 +377,7 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 		if(p.color == 1){
 			if(xtoGo - xtoMove == 1){
 				if(board[xtoGo][ytoGo].name == ' ')	return 1;
-			}else if(abs(ytoGo - ytoMove) == 1 && xtoGo - xtoMove == 1){
+			}else if(absoluteVal(ytoGo - ytoMove) == 1 && xtoGo - xtoMove == 1){
 				if(isEnemy)	return 1;
 			}else if(!toMove.isMoved){
 				if(xtoGo - xtoMove == 2){
@@ -382,7 +388,7 @@ int isValid(piece board[8][8], player p, piece toMove, int xtoMove, int ytoMove,
 		}else{
 			if(xtoGo - xtoMove == -1){
 				if(board[xtoGo][ytoGo].name == ' ')	return 1;
-			}else if(abs(ytoGo - ytoMove) == 1 && xtoGo - xtoMove == -1){
+			}else if(absoluteVal(ytoGo - ytoMove) == 1 && xtoGo - xtoMove == -1){
 				if(isEnemy)	return 1;
 			}else if(!toMove.isMoved){
 				if(xtoGo - xtoMove == -2){
